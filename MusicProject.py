@@ -7,6 +7,7 @@ from spotipy.oauth2 import SpotifyOAuth
 
 # TODO: Finish Exception Handling stuff
 # TODO: Maybe use more modular code and functions
+# TODO: FIX LINE 250 - 255
 
 ## CONSTANTS
 SPOTIFY_SCOPE                       = "playlist-modify-private playlist-modify-public"      # Scopes must be separated by a space. 
@@ -152,6 +153,15 @@ else:
     COMPARE_RATIO_DIFFLIB = ACCURACY_NORMAL
     print(f"--> compare ratio set to Normal: {ACCURACY_NORMAL}")
 
+# Ask user whether he wants to doublecheck bad comparison results manually during the search
+user_input = input("--> Do you want to doublecheck bad comparison results manually during the search? \nType \"y\" or \"n\":")
+if user_input == "y":
+    DOUBLECHECK_SEARCH = True
+    print("--> Doublecheck enabled.")
+else:
+    DOUBLECHECK_SEARCH = False
+    print("--> Doublecheck disabled.")
+
 # Ask user for creation of log file
 user_input = input("--> Do you want to generate a log file with the results? \nType \"y\" or \"n\":")
 if user_input == "y":
@@ -220,22 +230,29 @@ for i in range(len(mp3_list)):
     index = compare_ratios.index(max(compare_ratios))
 
     # If index is below chosen ration, ask user whether he still wants to add the found track
-    if compare_ratios[index] < COMPARE_RATIO_DIFFLIB:
-        user_input = input(f"--> The track number {i+1} \"{mp3_list[i]}\" was found with a similarity ratio of {round(compare_ratios[index],2)}.\\--> Search input:{mp3_list[i]}\n--> Found track:{search_result['tracks']['items'][index]['artists'][0]['name'].lower()} {search_result['tracks']['items'][index]['name'].lower()}. Do you still want to add this track? (y/n):")
+    if DOUBLECHECK_SEARCH and compare_ratios[index] < COMPARE_RATIO_DIFFLIB:
+        user_input = input(f"--> The track number {i+1} \"{mp3_list[i]}\" was found with a similarity ratio of {round(compare_ratios[index],2)}.\n--> Search input:\t{mp3_list[i]}\n--> Found track:\t{search_result['tracks']['items'][index]['artists'][0]['name'].lower()} {search_result['tracks']['items'][index]['name'].lower()}. Do you still want to add this track? (y/n):")
         if user_input == "y":
             search_track_IDs.append(search_result["tracks"]["items"][index]["id"])
         else:
             tracknames_not_identical.append(mp3_list[i])
-            continue
-
-    if compare_ratios_booleans[index] == True:
-        search_track_IDs.append(search_result["tracks"]["items"][index]["id"])
+    else:
+        if compare_ratios_booleans[index] == True:
+            search_track_IDs.append(search_result["tracks"]["items"][index]["id"])
+        else:
+            tracknames_not_identical.append(mp3_list[i])
+            
 
 
     if GENERATE_LOG_FILE:
         with open('log.csv', 'a', newline='') as file:
             writer = csv.writer(file, quoting=csv.QUOTE_ALL, delimiter=";")
-            status = "Success" if compare_ratios_booleans[index] == True else "Failure"
+            if mp3_list[i] in search_track_IDs:
+                status = "Success" # ZZZ THIS IS NOT WORKING CORRECTLY
+            elif mp3_list[i] in tracknames_not_identical:
+                status = "Not Identical"
+            else:
+                status = ""  # Add an empty status if the track is not in either list
             writer.writerow([status, mp3_list[i], search_result["tracks"]["items"][index]["artists"][0]["name"].lower() + " " + search_result["tracks"]["items"][index]["name"].lower(), round(compare_ratios[index],2)])
 
     # Print progress
