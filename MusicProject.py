@@ -219,11 +219,18 @@ for i in range(len(mp3_list)):
     # Get index of highest compare ratio
     index = compare_ratios.index(max(compare_ratios))
 
-    if compare_ratios_booleans[index] == False:
-        tracknames_not_identical.append(mp3_list[i])
+    # If index is below chosen ration, ask user whether he still wants to add the found track
+    if compare_ratios[index] < COMPARE_RATIO_DIFFLIB:
+        user_input = input(f"--> The track number {i+1} \"{mp3_list[i]}\" was found with a similarity ratio of {round(compare_ratios[index],2)}.\\--> Search input:{mp3_list[i]}\n--> Found track:{search_result['tracks']['items'][index]['artists'][0]['name'].lower()} {search_result['tracks']['items'][index]['name'].lower()}. Do you still want to add this track? (y/n):")
+        if user_input == "y":
+            search_track_IDs.append(search_result["tracks"]["items"][index]["id"])
+        else:
+            tracknames_not_identical.append(mp3_list[i])
+            continue
 
     if compare_ratios_booleans[index] == True:
         search_track_IDs.append(search_result["tracks"]["items"][index]["id"])
+
 
     if GENERATE_LOG_FILE:
         with open('log.csv', 'a', newline='') as file:
@@ -231,6 +238,7 @@ for i in range(len(mp3_list)):
             status = "Success" if compare_ratios_booleans[index] == True else "Failure"
             writer.writerow([status, mp3_list[i], search_result["tracks"]["items"][index]["artists"][0]["name"].lower() + " " + search_result["tracks"]["items"][index]["name"].lower(), round(compare_ratios[index],2)])
 
+    # Print progress
     progress = round((i + 1) / len(mp3_list) * 100)
     print(f"--> Search progress: {progress}%", end="\r")
 
