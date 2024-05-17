@@ -25,7 +25,7 @@ The script will then search for each MP3 file on Spotify, compare the filenames,
 
 ## Limitations
 - The script is limited to importing a maximum of 9999 tracks due to Spotify's API restrictions.
-- Special characters in MP3 filenames are removed during the search process.[1]
+- Special characters in MP3 filenames are removed during the search process.
 
 ## Version
-This is version 1.0 of the script, and it is still in development.
+This is version 1.0 of the script, and it is still in development. Feedback is also appreciated!
