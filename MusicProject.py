@@ -7,7 +7,6 @@ from spotipy.oauth2 import SpotifyOAuth
 
 # TODO: Finish Exception Handling stuff
 # TODO: Maybe use more modular code and functions
-# TODO: FIX LINE 250 - 255
 
 ## CONSTANTS
 SPOTIFY_SCOPE                       = "playlist-modify-private playlist-modify-public"      # Scopes must be separated by a space. 
@@ -232,7 +231,8 @@ for i in range(len(mp3_list)):
 
     # If index is below chosen ration, ask user whether he still wants to add the found track
     if DOUBLECHECK_SEARCH and compare_ratios[index] < COMPARE_RATIO_DIFFLIB:
-        user_input = input(f"--> The track number {i+1} \"{mp3_list[i]}\" was found with a similarity ratio of {round(compare_ratios[index],2)}.\n--> Search input:\t{mp3_list[i]}\n--> Found track:\t{search_result['tracks']['items'][index]['artists'][0]['name'].lower()} {search_result['tracks']['items'][index]['name'].lower()}. Do you still want to add this track? (y/n):")
+        user_input = input(f"--> The track number {i+1} was found with a similarity ratio of {round(compare_ratios[index],2)}.\n--> Search input:\t{mp3_list[i]}\n--> Found track:\t{search_result['tracks']['items'][index]['artists'][0]['name'].lower()} {search_result['tracks']['items'][index]['name'].lower()}\nDo you still want to add this track? (y/n):")
+        
         if user_input == "y":
             search_track_IDs.append(search_result["tracks"]["items"][index]["id"])
             overruled = True
@@ -250,11 +250,12 @@ for i in range(len(mp3_list)):
         with open('log.csv', 'a', newline='') as file:
             writer = csv.writer(file, quoting=csv.QUOTE_ALL, delimiter=";")
             
+            # Set status for log file 
             if  mp3_list[i] in tracknames_not_identical:
                 status = "Not Identical"
-                
+
             if overruled:
-                status = "Overruled"
+                status = "Success (Overruled)"
 
             if compare_ratios_booleans[index] == True:
                 status = "Success"
