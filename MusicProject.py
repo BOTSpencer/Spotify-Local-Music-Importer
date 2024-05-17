@@ -14,7 +14,7 @@ SPOTIFY_SCOPE                       = "playlist-modify-private playlist-modify-p
 
 ACCURACY_NORMAL                     = 0.80                                                  # Accuracy for comparing strings       
 ACCURACY_PRECISE                    = 0.95                                                  # Accuracy for comparing strings
-SEARCH_ANALYSIS_LIMIT               = 15                                                     # Number of song results to search for in every search request
+SEARCH_ANALYSIS_LIMIT               = 3                                                     # Number of song results to search for in every search request
 MAX_NUMBER_OF_TRACKS                = 9999                                                  # Max number of tracks to search for (Spotify Limit)
 
 search_track_IDs                    = []  # Track IDs that were found successfully
@@ -197,8 +197,9 @@ for i in range(len(mp3_list)):
 
     compare_ratios                      = [] 
     compare_ratios_booleans             = []
-    track_name_correct = False
-    track_artist_correct = False
+    track_name_correct                  = False
+    track_artist_correct                = False
+    overruled                           = False
 
     # Search Tracks from list with mp3 names as input with spotify api
     search_result = spotify.search(mp3_list[i], limit=SEARCH_ANALYSIS_LIMIT)
@@ -234,6 +235,7 @@ for i in range(len(mp3_list)):
         user_input = input(f"--> The track number {i+1} \"{mp3_list[i]}\" was found with a similarity ratio of {round(compare_ratios[index],2)}.\n--> Search input:\t{mp3_list[i]}\n--> Found track:\t{search_result['tracks']['items'][index]['artists'][0]['name'].lower()} {search_result['tracks']['items'][index]['name'].lower()}. Do you still want to add this track? (y/n):")
         if user_input == "y":
             search_track_IDs.append(search_result["tracks"]["items"][index]["id"])
+            overruled = True
         else:
             tracknames_not_identical.append(mp3_list[i])
     else:
@@ -247,12 +249,16 @@ for i in range(len(mp3_list)):
     if GENERATE_LOG_FILE:
         with open('log.csv', 'a', newline='') as file:
             writer = csv.writer(file, quoting=csv.QUOTE_ALL, delimiter=";")
-            if mp3_list[i] in search_track_IDs:
-                status = "Success" # ZZZ THIS IS NOT WORKING CORRECTLY
-            elif mp3_list[i] in tracknames_not_identical:
+            
+            if  mp3_list[i] in tracknames_not_identical:
                 status = "Not Identical"
-            else:
-                status = ""  # Add an empty status if the track is not in either list
+                
+            if overruled:
+                status = "Overruled"
+
+            if compare_ratios_booleans[index] == True:
+                status = "Success"
+
             writer.writerow([status, mp3_list[i], search_result["tracks"]["items"][index]["artists"][0]["name"].lower() + " " + search_result["tracks"]["items"][index]["name"].lower(), round(compare_ratios[index],2)])
 
     # Print progress
