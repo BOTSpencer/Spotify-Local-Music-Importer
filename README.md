@@ -11,8 +11,8 @@ This Python script allows you to import your local music files (MP3) into a Spot
 
 3. **Accuracy Settings**
    - Choose between "normal" or "precise" compare ratio for matching MP3 filenames with Spotify track names.
-   - Decide if you want to manually double-check results with low similarity during the search. This provides more precise control over which tracks are added, but it can be a tedious process due to the numerous user interactions required.[1]
-   - Precise uses a DiffLib compare ratio of >95%. This means that the found track is correct with a high chance, and the amount of false positives will be low to none.[1]
+   - Decide if you want to manually double-check results with low similarity during the search. This provides more precise control over which tracks are added, but it can be a tedious process due to the numerous user interactions required.
+   - Precise uses a DiffLib compare ratio of >95%. This means that the found track is correct with a high chance, and the amount of false positives will be low to none.
 
 4. **Log File**
    - Opt to generate a `log.csv` file containing details about the import process.
@@ -21,11 +21,12 @@ This Python script allows you to import your local music files (MP3) into a Spot
    - Choose to create a new Spotify playlist or add tracks to an existing one.
    - If creating a new playlist, provide a name for it.
 
-The script will then search for each MP3 file on Spotify, compare the filenames, and add matching tracks to the specified playlist. Progress updates and statistics will be displayed in the console.[1]
+The script will then search for each MP3 file on Spotify, compare the filenames, and add matching tracks to the specified playlist. Progress updates and statistics will be displayed in the console.
 
 ## Limitations
 - The script is limited to importing a maximum of 9999 tracks due to Spotify's API restrictions.
-- Special characters in MP3 filenames are removed during the search process.[1]
+- Special characters in MP3 filenames are removed during the search process for better Difflib comparison results.
+- The script can only add tracks that are on spotify. Tracks are not uploaded to spotify, they are only searched there by name. 
 
 ## Version
-This is version 1.0 of the script, and it is still in development.
+This is version 1.0 of the script. It is not perfect and acts as a small code training project for me. There are no further versions planed yet.
