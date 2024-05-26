@@ -25,7 +25,8 @@ The script will then search for each MP3 file on Spotify, compare the filenames,
 
 ## Limitations
 - The script is limited to importing a maximum of 9999 tracks due to Spotify's API restrictions.
-- Special characters in MP3 filenames are removed during the search process.
+- Special characters in MP3 filenames are removed during the search process for better Difflib comparison results.
+- The script can only add tracks that are on spotify. Tracks are not uploaded to spotify, they are only searched there by name. 
 
 ## Version
-This is version 1.0 of the script, and it is still in development. Feedback is also appreciated!
+This is version 1.0 of the script. It is not perfect and acts as a small code training project for me. There are no further versions planed yet.
