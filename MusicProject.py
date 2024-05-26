@@ -4,9 +4,7 @@ import difflib
 import csv
 import json
 from spotipy.oauth2 import SpotifyOAuth
-
-# TODO: Finish Exception Handling stuff
-# TODO: Maybe use more modular code and functions
+import shutil
 
 ## CONSTANTS
 SPOTIFY_SCOPE                       = "playlist-modify-private playlist-modify-public"      # Scopes must be separated by a space. 
@@ -20,7 +18,8 @@ search_track_IDs                    = []  # Track IDs that were found successful
 zero_found_list                     = []  # Tracks with no search result are listed here
 tracks_in_playlist                  = []  # Tracks which are in playlist get listed here
 tracknames_not_identical            = []  # Tracks that were added and are NOT identical to the mp3 list are listed here
-
+mp3_list_original                   = []  # List of all mp3 files in the folder
+mp3_list                            = []  # List of all mp3 files in the folder, unchanged
 
 ## DEF FUNCTIONS
 def read_files_from_path(path):
@@ -96,6 +95,30 @@ def remove_special_characters(string):
         string = string.replace(character, "")
     return string
 
+def move_mp3_file_into_new_folder(mp3_list_original, i):
+    """
+    Moves mp3 files from the original location to a new directory.
+
+    Args:
+        mp3_list_original (list): A list of mp3 file names.
+        i (int): The index of the file to be moved.
+
+    Returns:
+        None
+    """
+    source_path = os.path.join(PATH_MUSIC, mp3_list_original[i])
+
+    # Create new directory for not identical tracks
+    new_directory = os.path.join(PATH_MUSIC, "NotIdenticalTracks")
+    if not os.path.exists(new_directory):
+        os.makedirs(new_directory)
+            
+    destination_path = os.path.join(new_directory, mp3_list_original[i])
+    print(destination_path)
+
+    # Move the file
+    shutil.move(source_path, destination_path)
+
 ## MAIN CODE
 
 print("---------------------------------------------------------------------------------------\n")
@@ -121,19 +144,21 @@ except KeyError:
     print("--> Invalid format in secrets.json file.")
     raise SystemExit("Exiting the program - Invalid format in secrets.json file")
 
-print("--> Spotify login data read successful.")
+print("--> Spotify login data read successfully.")
 
 # Read mp3 files from path and filter to only include .mp3 files
 try:
     PATH_MUSIC = input("--> Enter the path to the directory where the music files are located: ").replace('\\', '/')  # Get path to music directory from user
     #PATH_MUSIC = 'C:/Users/Master/Desktop/MusikVaterFavorites' ### Use this line for testing faster - DELETE THIS LINE FOR FINAL VERSION ###
     full_folder_list = read_files_from_path(PATH_MUSIC)
-    mp3_list = [name for name in full_folder_list if name.endswith(".mp3")]
+    mp3_list_original = [name for name in full_folder_list if name.endswith(".mp3")]
 except FileNotFoundError:
     print("--> Error: Path not found.")
 except Exception as e:
     print(f"--> Error: {str(e)}")
     raise SystemExit("Exiting the program - Error in reading the mp3 files")
+
+mp3_list = mp3_list_original.copy()
 
 # Remove special characters from mp3_list
 for k in range(len(mp3_list)):
@@ -238,12 +263,18 @@ for i in range(len(mp3_list)):
             overruled = True
         else:
             tracknames_not_identical.append(mp3_list[i])
+            
+            # Move the file to a new directory
+            move_mp3_file_into_new_folder(mp3_list_original, i)
+            
     else:
         if compare_ratios_booleans[index] == True:
             search_track_IDs.append(search_result["tracks"]["items"][index]["id"])
         else:
             tracknames_not_identical.append(mp3_list[i])
             
+            # Move the file to a new directory
+            move_mp3_file_into_new_folder(mp3_list_original, i)
 
 
     if GENERATE_LOG_FILE:
@@ -276,7 +307,7 @@ if GENERATE_LOG_FILE:
         writer.writerow(["Successfully found tracks", len(search_track_IDs)])
         writer.writerow(["Not identical tracks", len(tracknames_not_identical)])
         writer.writerow(["Amount of zero found results", len(zero_found_list)])
-        writer.writerow(["Success rate Search", round(len(search_track_IDs) / len(mp3_list) * 100, 2)])
+        writer.writerow(["Success rate Search (%)", round(len(search_track_IDs) / len(mp3_list) * 100, 2)])
         writer.writerow(["Success rate Playlist", round(len(tracks_in_playlist) / len(mp3_list) * 100, 2)])
 
 print("--> Search and comparison successful.")
