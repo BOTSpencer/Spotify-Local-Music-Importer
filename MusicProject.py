@@ -114,7 +114,6 @@ def move_mp3_file_into_new_folder(mp3_list_original, i):
         os.makedirs(new_directory)
             
     destination_path = os.path.join(new_directory, mp3_list_original[i])
-    print(destination_path)
 
     # Move the file
     shutil.move(source_path, destination_path)
