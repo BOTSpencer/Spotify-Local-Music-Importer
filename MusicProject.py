@@ -277,7 +277,7 @@ for i in range(len(mp3_list)):
 
 
     if GENERATE_LOG_FILE:
-        with open('log.csv', 'a', newline='') as file:
+        with open('log.csv', 'a', newline='', encoding='utf-8') as file:
             writer = csv.writer(file, quoting=csv.QUOTE_ALL, delimiter=";")
             
             # Set status for log file 
@@ -335,6 +335,7 @@ if user_answer_add_tracks == "y":
     print("--> Tracks added to playlist successfully.")
 
     # Get Data from Playlist
+    print("--> Getting data from playlist...")
     rawdata1 = spotify.playlist(playlist_id)  # Get data of playlist
     number_of_tracks = rawdata1["tracks"]["total"]  # Get number of tracks from playlist data
 
@@ -344,7 +345,7 @@ if user_answer_add_tracks == "y":
         track_name = rawdata2["items"][0]["track"]["name"]
         track_artist = rawdata2["items"][0]["track"]["artists"][0]["name"]
         full_track_name = track_artist + " - " + track_name
-        tracks_in_playlist.append(full_track_name)
+        tracks_in_playlist.append(full_track_name)   
 
     # Write tracks on playlist to log.csv file
     if GENERATE_LOG_FILE:
